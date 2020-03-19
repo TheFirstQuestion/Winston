@@ -7,6 +7,7 @@ Winston is a bot. He's here to help. He's like [J.A.R.V.I.S.](https://en.wikiped
 * Install dependencies: `npm install keybase-bot pdfkit feedparser request`
 * Create `bot-paper-key.txt` (line 1: the username, line 2: the paperkey)
 * Create (empty) directory `images/`
+* create `config.js` (example is provided, real values are only needed for controlling lights)
 * `node winston.js`
 
 ---
