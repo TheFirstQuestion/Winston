@@ -6,13 +6,17 @@ const fs = require('fs');
 const https = require('https');
 const bot = new Bot()
 
-//////////// config /////////////
+//////////// constants /////////////
 const PWD_FILE = "bot-paper-key.txt"
 const IMG_DIR = "images/";
 const PDF_NAME = "homework.pdf";
 const XKCD_FEED = "https://www.xkcd.com/rss.xml";
 const XKCD_IMG_NAME = "xkcd.jpg";
 /////////////////////////////////
+
+// Include the config file
+// https://stackoverflow.com/a/28066576
+require('./config.js')();
 
 
 async function main() {
@@ -49,6 +53,13 @@ async function main() {
 
             if (channel == "testing") {
                 console.log(message);
+                if (message.content.text.body.startsWith("lights on")) {
+                    lightsOn();
+                } else if (message.content.text.body.startsWith("lights off")) {
+                    lightsOff();
+                } else if (message.content.text.body.startsWith("lights dim")) {
+                    lightsDim();
+                }
             }
 
             // If not text, quit
@@ -71,11 +82,11 @@ async function main() {
             return;
         }
 
-        const onError = e => console.error(e);
+        const onError = e => console.error("Keybase Error 2: " + e);
         console.log(`Listening for messages...`);
         await bot.chat.watchAllChannelsForNewMessages(onMessage, onError);
     } catch (error) {
-        console.error(error);
+        console.error("Keybase Error 1: " + error);
     }
 
 }
@@ -94,7 +105,7 @@ function makePDF() {
     try {
         arrayOfFiles = fs.readdirSync(IMG_DIR)
     } catch(e) {
-        console.log(e)
+        console.log("Error Reading Directory: " + e)
     }
 
     for (i in arrayOfFiles) {
@@ -114,7 +125,7 @@ function makePDF() {
         try {
             fs.unlinkSync(fname);
         } catch (err) {
-            console.log(err);
+            console.log("Error Deleting Image: " + err);
         }
     }
 
@@ -170,6 +181,30 @@ function getRSSFeed(timeNow, channel) {
                 console.log("entry too old.");
             }
         }
+    });
+}
+
+function lightsOn() {
+    makeRequest(POWER_STRIP_ON);
+    makeRequest(LIGHT_STRIP_ON);
+}
+
+function lightsOff() {
+    makeRequest(POWER_STRIP_OFF);
+    makeRequest(LIGHT_STRIP_OFF);
+
+}
+
+function lightsDim() {
+    makeRequest(POWER_STRIP_DIM);
+    makeRequest(LIGHT_STRIP_OFF);
+}
+
+function makeRequest(url) {
+    https.get(url, (resp) => {
+        console.log("Request successful.")
+    }).on("error", (err) => {
+        console.log("Request Error: " + err.message);
     });
 }
 //////////////////////////////////////////////////////////////////
