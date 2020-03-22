@@ -7,7 +7,7 @@ Winston is a bot. He's here to help. He's like [J.A.R.V.I.S.](https://en.wikiped
 * Install dependencies: `npm install keybase-bot pdfkit feedparser request`
 * Create `bot-paper-key.txt` (line 1: the username, line 2: the paperkey)
 * Create (empty) directory `images/`
-* create `config.js` (example is provided, real values are only needed for controlling lights)
+* create `config.js` (example is provided, real values are only needed if controlling lights)
 * `node winston.js`
 
 ---
@@ -20,12 +20,12 @@ Winston is a bot. He's here to help. He's like [J.A.R.V.I.S.](https://en.wikiped
 
 ## XKCD
 * monitors channel `xkcd`
-* a simple IFTT recipe sends `xkcd?` when the RSS feed is updated, using the webhookbot
+* a simple IFTT recipe sends `xkcd?` when the RSS feed is updated, using the Keybase webhookbot
 * when `xkcd?` is sent, the RSS feed is checked; any comic posted within 15 minutes is downloaded and sent
 
 
 ## Lights
-* looks for `lights on`, `lights off`, `lights dim` and triggers IFTT actions that match that
+* looks for `lights on`, `lights off`, `lights dim` and triggers IFTT actions that match
 * IFTT Webhook URLs should be stored in `config.js` (an example is provided)
 
 ---

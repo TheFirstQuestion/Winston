@@ -11,7 +11,7 @@ const PWD_FILE = "bot-paper-key.txt"
 const IMG_DIR = "images/";
 const PDF_NAME = "homework.pdf";
 const XKCD_FEED = "https://www.xkcd.com/rss.xml";
-const XKCD_IMG_NAME = "xkcd.jpg";
+const XKCD_IMG_NAME = "xkcd";
 /////////////////////////////////
 
 // Include the config file
@@ -33,33 +33,27 @@ async function main() {
 
         const onMessage = async message => {
             var channel = message.channel.topicName;
+            var messageText = message.content.text.body;
 
             if (channel == "png2pdf") {
                 if (message.content.type == 'attachment') {
                     bot.chat.download(message.conversationId, message.id, IMG_DIR + message.content.attachment.object.filename);
                     return;
                 }
-                if (message.content.text.body.startsWith('convert')) {
+                if (messageText.includes('convert')) {
                     makePDF();
                     bot.chat.attach(message.conversationId, PDF_NAME);
                 }
             }
 
             if (channel == "xkcd") {
-                if (message.content.text.body.startsWith("xkcd?")) {
+                if (message.content.text.body.includes("xkcd?")) {
                     getRSSFeed((new Date()).getTime(), message.conversationId);
                 }
             }
 
             if (channel == "testing") {
                 console.log(message);
-                if (message.content.text.body.startsWith("lights on")) {
-                    lightsOn();
-                } else if (message.content.text.body.startsWith("lights off")) {
-                    lightsOff();
-                } else if (message.content.text.body.startsWith("lights dim")) {
-                    lightsDim();
-                }
             }
 
             // If not text, quit
@@ -67,13 +61,26 @@ async function main() {
                 return
             }
 
-            if (message.content.text.body.startsWith('PING')) {
+            // Control the lights
+            if (messageText.includes("lights")) {
+                if (messageText.includes("on")) {
+                    lightsOn();
+                } else if (messageText.includes("off")) {
+                    lightsOff();
+                } else if (messageText.includes("dim")) {
+                    lightsDim();
+                }
+            }
+
+            // PING PONG (for testing)
+            if (messageText.startsWith('PING')) {
                 bot.chat.send(message.conversationId, {
                     body: "PONG",
                 });
             }
 
-            if (message.content.text.body.startsWith('!echo ')) {
+            // !echo command (for testing)
+            if (messageText.startsWith('!echo ')) {
                 bot.chat.send(message.conversationId, {
                     body: message.content.text.body.substr(6),
                 });
@@ -134,11 +141,11 @@ function makePDF() {
 }
 
 function getRSSFeed(timeNow, channel) {
-    var req = request(XKCD_FEED)
+    var req = request(XKCD_FEED);
     var feedparser = new FeedParser();
 
     req.on('error', function (error) {
-        console.log(error);
+        console.log("XKCD Feed Request Error: " + error);
     });
 
     req.on('response', function (res) {
@@ -152,7 +159,7 @@ function getRSSFeed(timeNow, channel) {
     });
 
     feedparser.on('error', function (error) {
-        console.log(error);
+        console.log("FeedParser Error: " + error);
     });
 
     feedparser.on('readable', function () {
@@ -172,13 +179,15 @@ function getRSSFeed(timeNow, channel) {
                 const file = fs.createWriteStream(XKCD_IMG_NAME);
                 const request = https.get(imgUrl, function(response) {
                     response.pipe(file);
+                }).on("error", (err) => {
+                    console.log("XKCD Image Request Error: " + err.message);
                 });
                 // Send it
                 bot.chat.attach(channel, XKCD_IMG_NAME, {
-                    title: "*" + title + ":* " + altText,
+                    title: "*" + title + ":* " + altText
                 });
             } else {
-                console.log("entry too old.");
+                console.log("entry too old");
             }
         }
     });

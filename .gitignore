@@ -2,5 +2,5 @@ bot-paper-key.txt
 node_modules/
 images/
 homework.pdf
-xkcd.jpg
+xkcd*
 config.js
