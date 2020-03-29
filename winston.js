@@ -4,7 +4,6 @@ const FeedParser = require('feedparser');
 const request = require('request');
 const fs = require('fs');
 const https = require('https');
-const bot = new Bot()
 
 //////////// constants /////////////
 const PWD_FILE = "bot-paper-key.txt"
@@ -12,6 +11,7 @@ const IMG_DIR = "images/";
 const PDF_NAME = "homework.pdf";
 const XKCD_FEED = "https://www.xkcd.com/rss.xml";
 const XKCD_IMG_NAME = "xkcd";
+const XKCD_TIME_RANGE = 60;
 /////////////////////////////////
 
 // Include the config file
@@ -19,6 +19,7 @@ const XKCD_IMG_NAME = "xkcd";
 require('./config.js')();
 
 
+const bot = new Bot()
 async function main() {
     try {
         const file = fs.readFileSync(PWD_FILE, { encoding: 'utf8' }).split("\n");
@@ -34,22 +35,21 @@ async function main() {
         const onMessage = async message => {
             var channel = message.channel.topicName;
             var messageText = message.content.text.body;
+            var words = parseMessage(messageText);
 
             if (channel == "png2pdf") {
                 if (message.content.type == 'attachment') {
                     bot.chat.download(message.conversationId, message.id, IMG_DIR + message.content.attachment.object.filename);
                     return;
                 }
-                if (messageText.includes('convert')) {
+                if (words.includes('convert')) {
                     makePDF();
                     bot.chat.attach(message.conversationId, PDF_NAME);
                 }
             }
 
             if (channel == "xkcd") {
-                if (message.content.text.body.includes("xkcd?")) {
-                    getRSSFeed((new Date()).getTime(), message.conversationId);
-                }
+                getRSSFeed((new Date()).getTime(), message.conversationId);
             }
 
             if (channel == "testing") {
@@ -62,12 +62,12 @@ async function main() {
             }
 
             // Control the lights
-            if (messageText.includes("lights")) {
-                if (messageText.includes("on")) {
+            if (words.includes("lights")) {
+                if (words.includes("on")) {
                     lightsOn();
-                } else if (messageText.includes("off")) {
+                } else if (words.includes("off")) {
                     lightsOff();
-                } else if (messageText.includes("dim")) {
+                } else if (words.includes("dim")) {
                     lightsDim();
                 }
             }
@@ -104,6 +104,14 @@ async function shutDown() {
 }
 
 //////////////////////////// helper functions /////////////////////
+function parseMessage(message) {
+    var words = message.split(" ");
+    for (let i = 0; i < words.length; i++) {
+        words[i] = words[i].toLowerCase();
+    }
+    return words;
+}
+
 function makePDF() {
     const doc = new PDFDocument({autoFirstPage: false});
     doc.pipe(fs.createWriteStream(PDF_NAME));
@@ -168,13 +176,12 @@ function getRSSFeed(timeNow, channel) {
         var item;
 
         while (item = stream.read()) {
-            //console.log(item);
             var title = item.title;
             var imgUrl = item.summary.split('"')[1];
             var altText = item.summary.split('"')[3];
             // This is in minutes
             var delta = (timeNow - item.pubDate.getTime()) / (1000 * 60);
-            if (delta < 15) {
+            if (delta < XKCD_TIME_RANGE) {
                 // Download the file
                 const file = fs.createWriteStream(XKCD_IMG_NAME);
                 const request = https.get(imgUrl, function(response) {
