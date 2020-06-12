@@ -25,8 +25,9 @@ Winston is a bot. He's here to help. He's like [J.A.R.V.I.S.](https://en.wikiped
 
 
 ## Lights
-* looks for `lights on`, `lights off`, `lights dim` and triggers IFTT actions that match
-* IFTT Webhook URLs should be stored in `config.js` (an example is provided)
+* Light strip is controlled via IFTT
+* Power strip is controlled via API (see setup instructions at https://github.com/codetheweb/tuyapi/blob/master/docs/SETUP.md)
+* IFTT Webhook URLs and TuyAPI object should be stored in `config.js` (an example is provided)
 
 ---
 _____onsite, in progress_____
