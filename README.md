@@ -4,7 +4,7 @@ Winston is a bot. He's here to help. He's like [J.A.R.V.I.S.](https://en.wikiped
 **W**inston **I**s **N**ot **S**ome **T**oy, **O**kay **N**erds?
 
 ## Running
-* Install dependencies: `npm install keybase-bot pdfkit feedparser request`
+* Install dependencies: `npm install keybase-bot pdfkit feedparser request codetheweb/tuyapi`
 * Create `bot-paper-key.txt` (line 1: the username, line 2: the paperkey)
 * Create (empty) directory `images/`
 * create `config.js` (example is provided, real values are only needed if controlling lights)

@@ -4,6 +4,7 @@ const FeedParser = require('feedparser');
 const request = require('request');
 const fs = require('fs');
 const https = require('https');
+const TuyAPI = require('tuyapi');
 
 //////////// constants /////////////
 const PWD_FILE = "bot-paper-key.txt"
@@ -54,6 +55,7 @@ async function main() {
 
             if (channel == "testing") {
                 console.log(message);
+                console.log("---------------------------------\n");
             }
 
             // If not text, quit
@@ -200,20 +202,47 @@ function getRSSFeed(timeNow, channel) {
     });
 }
 
-function lightsOn() {
-    makeRequest(POWER_STRIP_ON);
+// Add event listeners
+device.on('connected', () => {
+  console.log('Connected to device!');
+});
+
+device.on('disconnected', () => {
+  console.log('Disconnected from device.');
+});
+
+device.on('error', error => {
+  console.log('Error!', error);
+});
+
+async function lightsOn() {
+    await device.find();
+    await device.connect();
+    await device.set({dps: 1, set: true});
+    await device.set({dps: 4, set: true});
+    await device.set({dps: 5, set: true});
     makeRequest(LIGHT_STRIP_ON);
+    device.disconnect();
 }
 
-function lightsOff() {
-    makeRequest(POWER_STRIP_OFF);
+async function lightsOff() {
+    await device.find();
+    await device.connect();
+    await device.set({dps: 1, set: false});
+    await device.set({dps: 4, set: false});
+    await device.set({dps: 5, set: false});
     makeRequest(LIGHT_STRIP_OFF);
-
+    device.disconnect();
 }
 
-function lightsDim() {
-    makeRequest(POWER_STRIP_DIM);
+async function lightsDim() {
+    await device.find();
+    await device.connect();
+    await device.set({dps: 1, set: true});
+    await device.set({dps: 4, set: false});
+    await device.set({dps: 5, set: true});
     makeRequest(LIGHT_STRIP_OFF);
+    device.disconnect();
 }
 
 function makeRequest(url) {
